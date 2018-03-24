@@ -1,13 +1,15 @@
 import * as THREE from "three";
 import Application from "./BaseApplication";
-import { Planet, Sun, Universe, GlowingPlanet, PlanetAnimator } from "./SolarSystem";
+import { Planet, Sun, Universe, GlowingPlanet, PlanetAnimator, SolarSystem } from "./PlanetObjects";
 import dat from 'dat.gui';
 import { OrbitControls } from "./OrbitControls";
+import { EffectComposer, BloomPass, KernelSize, GodRaysPass, RenderPass } from "postprocessing";
 
 class SolarSystemApplication extends Application {
     // Objects
-    sun: Sun;
+    solarSystem: SolarSystem;
     universe: Universe;
+    godRaysPass: any;
 
     // Controls
     orbitControl: OrbitControls;
@@ -63,28 +65,55 @@ class SolarSystemApplication extends Application {
         //
         // PLANETS
         //
+        this.solarSystem = new SolarSystem();
+        this.scene.add(this.solarSystem);
 
         // Sun
-        this.sun = new Sun("Sole", 2, "sun.jpg", new THREE.Color(0xFE8201),
+        let sun = new Sun("Sole", 3, "sun.jpg", new THREE.Color(0xFE8201),
                 0.02, 20.0, 1.0, 3.0, new PlanetAnimator(0, 0, 0, 0),
                 this.camera, 0xFFFFFF, 3.0, 40.0);        
-        this.selectedPlanet = this.sun;
-        this.scene.add(this.sun);
+        this.selectedPlanet = sun;
+        this.solarSystem.add(sun);
 
         // Earth
-        let earthAnimator = new PlanetAnimator(13, 0.0005, 1, 0.0);
+        let earthAnimator = new PlanetAnimator(15, 0.0005, 1, 0.0);
         let earth = new GlowingPlanet("Terra", 1.0, "earth.jpg", new THREE.Color(0x0081C6), 0.001, 5.0, 0.4, 1.4, earthAnimator, this.camera);
-        this.sun.add(earth);
+        this.solarSystem.add(earth);
 
         // Moon
-        let moonAnimator = new PlanetAnimator(2, 0.001, 1, 0.0);
+        let moonAnimator = new PlanetAnimator(3, 0.001, 1, 0.0);
         let moon = new Planet("Luna", 1.0/2.0, "moon.jpg", moonAnimator);
         earth.add(moon);
 
         // Mars
-        let marsAnimator = new PlanetAnimator(17, 0.0004, 1, 0.5);
+        let marsAnimator = new PlanetAnimator(20, 0.0003, 1, 0.5);
         let mars = new GlowingPlanet("Marte", 0.9, "mars.jpg", new THREE.Color(0xFE8201), 0.001, 10.0, 0.4, 1.4, marsAnimator, this.camera);
-        this.sun.add(mars);
+        this.solarSystem.add(mars);
+
+        // Jupiter
+        let jupiterAnimator = new PlanetAnimator(35, 0.0001, 1, 1.0);
+        let jupiter = new GlowingPlanet("Giove", 1.5, "jupiter.jpg", new THREE.Color(0xFE8233), 0.001, 10.0, 0.4, 1.4, jupiterAnimator, this.camera);
+        this.solarSystem.add(jupiter);
+
+        // Ganymede
+        let ganymedeAnimator = new PlanetAnimator(5, 0.0005, 1, 0.0);
+        let ganymede = new Planet("Ganimede", 0.7, "ganymede.jpg", ganymedeAnimator);
+        jupiter.add(ganymede);
+
+        // Godrays
+        this.godRaysPass = new GodRaysPass(this.scene, this.camera, sun, {
+			resolutionScale: 0.6,
+			kernelSize: KernelSize.SMALL,
+			intensity: 1.0,
+			density: 0.96,
+			decay: 0.93,
+			weight: 0.4,
+			exposure: 0.6,
+			samples: 60,
+			clampMax: 1.0
+        });
+        this.godRaysPass.renderToScreen = true;
+        this.composer.addPass(this.godRaysPass);
     }
 
     update(dt: number) {
@@ -100,7 +129,7 @@ class SolarSystemApplication extends Application {
         }
 
         this.orbitControl.update();
-        this.sun.update(this.t);
+        this.solarSystem.update(this.t);
     }
 }
 

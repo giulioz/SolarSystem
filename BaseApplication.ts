@@ -1,20 +1,38 @@
 import Stats from "./stats";
 import * as THREE from "three";
+import { EffectComposer, BloomPass, RenderPass } from "postprocessing";
 
 export default abstract class Application {
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     renderer: THREE.Renderer;
+    composer: any;
     stats: Stats;
     time: number;
+    renderPass: any;
+    bloomPass: any;
 
     constructor() {
         // THREE.js
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000000);
         this.renderer = new THREE.WebGLRenderer({antialias: true});
+        (this.renderer as any).shadowMap.enabled = true;
+        (this.renderer as any).shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
+
+        this.composer = new EffectComposer(this.renderer);
+        this.renderPass = new RenderPass(this.scene, this.camera);
+        this.renderPass.renderToScreen = false;
+        this.composer.addPass(this.renderPass);
+        // this.bloomPass = new BloomPass({
+		// 	resolutionScale: 0.5,
+		// 	intensity: 1.5,
+		// 	distinction: 4.0
+		// });
+        // this.bloomPass.renderToScreen = false;
+        // this.composer.addPass(this.bloomPass);
 
         // Resize event
         window.addEventListener('resize', () => {
@@ -41,7 +59,8 @@ export default abstract class Application {
         requestAnimationFrame(this.cycle);
         this.update(this.dt);
 
-        this.renderer.render(this.scene, this.camera);
+        //this.renderer.render(this.scene, this.camera);
+        this.composer.render(this.dt);
         this.stats.update();
     };
 

@@ -1,5 +1,17 @@
 import * as THREE from "three";
 
+// Planet Container
+export class SolarSystem extends THREE.Object3D {
+    update(t) {
+        // Update childrens
+        this.children.forEach(sat => {
+            if (sat instanceof Planet) {
+                (sat as Planet).update(t);
+            }
+        });
+    }
+}
+
 // A planet mesh that rotates
 export class Planet extends THREE.Mesh {
     animator: PlanetAnimator;
@@ -8,9 +20,11 @@ export class Planet extends THREE.Mesh {
         let geometry = new THREE.SphereGeometry(radius, 64, 64);
         if (!material)
             material = new THREE.MeshPhongMaterial({
-                map: new THREE.TextureLoader().load(texture)
+                map: new THREE.TextureLoader().load(texture),
             });
         super(geometry, material);
+        this.castShadow = true;
+        this.receiveShadow = true;
 
         this.animator = animator;
         this.name = name;
@@ -44,7 +58,7 @@ export class GlowingPlanet extends Planet {
 }
 
 // A planet that emits light
-export class Sun extends GlowingPlanet {
+export class Sun extends Planet {
     light: THREE.PointLight;
 
     constructor(name: string, radius: number, texture: string,
@@ -59,8 +73,11 @@ export class Sun extends GlowingPlanet {
             vertexShader: document.getElementById('sunVertexShader').textContent,
             fragmentShader: document.getElementById('sunFragmentShader').textContent
         });
-        super(name, radius, texture, new THREE.Color(0xFE8201), 0.02, 20.0, 1.0, 3.0, new PlanetAnimator(0, 0, 0, 0), camera, material);
+        super(name, radius, texture, new PlanetAnimator(0, 0, 0, 0), material);
         this.light = new THREE.PointLight(lightColor, lightIntensity, lightRadius);
+        this.light.castShadow = true;
+        this.castShadow = false;
+        this.receiveShadow = false;
         this.add(this.light);
     }
 }
@@ -86,6 +103,8 @@ export class PlanetGlow extends THREE.Mesh {
             // side: THREE.DoubleSide
         });
         super(new THREE.SphereGeometry(radius, 128, 128), material);
+        this.castShadow = false;
+        this.receiveShadow = true;
         this.uniforms = _uniforms;
     }
 }
