@@ -49,8 +49,14 @@ class SolarSystemApplication extends Application {
             this.mousePos.y = -(event.clientY / window.innerHeight) * 2 + 1;
         }, false);
 
+        // GUI
+        let options = {
+        }
+        this.gui = new dat.GUI({width: 300});
+        // this.gui.add(options, "cameraX", -10, 10).onChange(() => {this.camera.position.x = options.cameraX});
+
         // Universe: background and ambient light
-        this.universe = new Universe();
+        this.universe = new Universe("stars.jpg", 0xFFFFFF, 0.1);
         this.scene.add(this.universe);
 
 
@@ -59,32 +65,26 @@ class SolarSystemApplication extends Application {
         //
 
         // Sun
-        this.sun = new Sun("Sole", 2, "sun.jpg", this.camera);
+        this.sun = new Sun("Sole", 2, "sun.jpg", new THREE.Color(0xFE8201),
+                0.02, 20.0, 1.0, 3.0, new PlanetAnimator(0, 0, 0, 0),
+                this.camera, 0xFFFFFF, 3.0, 40.0);        
         this.selectedPlanet = this.sun;
         this.scene.add(this.sun);
 
         // Earth
         let earthAnimator = new PlanetAnimator(13, 0.0005, 1, 0.0);
         let earth = new GlowingPlanet("Terra", 1.0, "earth.jpg", new THREE.Color(0x0081C6), 0.001, 5.0, 0.4, 1.4, earthAnimator, this.camera);
-        this.sun.addSatellite(earth);
+        this.sun.add(earth);
 
         // Moon
         let moonAnimator = new PlanetAnimator(2, 0.001, 1, 0.0);
         let moon = new Planet("Luna", 1.0/2.0, "moon.jpg", moonAnimator);
-        earth.addSatellite(moon);
+        earth.add(moon);
 
         // Mars
         let marsAnimator = new PlanetAnimator(17, 0.0004, 1, 0.5);
         let mars = new GlowingPlanet("Marte", 0.9, "mars.jpg", new THREE.Color(0xFE8201), 0.001, 10.0, 0.4, 1.4, marsAnimator, this.camera);
-        this.sun.addSatellite(mars);
-
-        //
-        // GUI
-        //
-        let options = {
-        }
-        this.gui = new dat.GUI({width: 300});
-        // this.gui.add(options, "cameraX", -10, 10).onChange(() => {this.camera.position.x = options.cameraX});
+        this.sun.add(mars);
     }
 
     update(dt: number) {

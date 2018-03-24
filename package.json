@@ -3,7 +3,8 @@
   "main": "server.js",
   "scripts": {
     "test": "node server.js",
-    "build": "webpack -p --progress"
+    "build": "webpack --progress",
+    "build-prod": "webpack -p --progress"
   },
   "devDependencies": {
     "@types/three": "^0.91.0",
