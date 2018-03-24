@@ -1,0 +1,20 @@
+{
+  "name": "es1",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js",
+    "build": "webpack -p --progress"
+  },
+  "devDependencies": {
+    "@types/three": "^0.91.0",
+    "ts-loader": "^4.1.0",
+    "typescript": "^2.7.2",
+    "webpack": "^4.2.0",
+    "webpack-cli": "^2.0.13"
+  },
+  "dependencies": {
+    "dat.gui": "^0.7.1",
+    "express": "^4.16.3",
+    "three": "^0.91.0"
+  }
+}
