@@ -17,6 +17,7 @@
     "dat.gui": "^0.7.1",
     "express": "^4.16.3",
     "postprocessing": "^4.3.3",
-    "three": "^0.91.0"
+    "three": "^0.91.0",
+    "zingtouch": "^1.0.5"
   }
 }

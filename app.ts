@@ -14,11 +14,9 @@ class SolarSystemApplication extends Application {
     // Controls
     orbitControl: OrbitControls;
     raycaster: THREE.Raycaster;
-    mousePos: THREE.Vector2;
     gui;
     info: HTMLDivElement;
     selectedPlanet: Planet;
-    overPlanet: Planet;
 
     // Animation time
     t: number = 0;
@@ -34,27 +32,28 @@ class SolarSystemApplication extends Application {
 
         // Camera and controls
         this.camera.position.z = 8;
-        this.orbitControl = new OrbitControls(this.camera, this.renderer.domElement, () => {
+        this.orbitControl = new OrbitControls(this.camera, this.renderer.domElement, event => {
             // Click event
-            let delta = new THREE.Vector3().add(this.selectedPlanet.position).sub(this.overPlanet.position);
-            this.selectedPlanet = this.overPlanet;
-            this.info.textContent = this.selectedPlanet.name;
-            this.camera.position.add(delta);
-            this.orbitControl.update();
+            let mousePosX =  (event.clientX / window.innerWidth)  * 2 - 1;
+            let mousePosY = -(event.clientY / window.innerHeight) * 2 + 1;
+            // Find planet-mouse intersection
+            this.raycaster.setFromCamera(new THREE.Vector2(mousePosX, mousePosY), this.camera);
+            let intersects = this.raycaster.intersectObjects(this.scene.children, true);
+            for (var i = 0; i < intersects.length; i++) {
+                if (intersects[i].object instanceof Planet) {
+                    this.selectedPlanet = intersects[i].object as Planet;
+                    this.info.textContent = this.selectedPlanet.name;
+                }
+            }
         });
 
         // Mouse position for raycaster
-        this.mousePos = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
-        window.addEventListener('mousemove', event => {
-            this.mousePos.x =  (event.clientX / window.innerWidth)  * 2 - 1;
-            this.mousePos.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        }, false);
 
         // GUI
-        let options = {
-        }
-        this.gui = new dat.GUI({width: 300});
+        // let options = {
+        // }
+        // this.gui = new dat.GUI({width: 300});
         // this.gui.add(options, "cameraX", -10, 10).onChange(() => {this.camera.position.x = options.cameraX});
 
         // Universe: background and ambient light
@@ -70,33 +69,33 @@ class SolarSystemApplication extends Application {
 
         // Sun
         let sun = new Sun("Sole", 3, "sun.jpg", new THREE.Color(0xFE8201),
-                0.02, 20.0, 1.0, 3.0, new PlanetAnimator(0, 0, 0, 0),
-                this.camera, 0xFFFFFF, 3.0, 40.0);        
+                0.02, 20.0, 1.0, 3.0, new PlanetAnimator(0, 0, 0.01, 0),
+                this.camera, 0xFFFFFF, 3.0, 100.0);
         this.selectedPlanet = sun;
         this.solarSystem.add(sun);
 
         // Earth
-        let earthAnimator = new PlanetAnimator(15, 0.0005, 1, 0.0);
+        let earthAnimator = new PlanetAnimator(20, 0.0005, 0.005, 0.0);
         let earth = new GlowingPlanet("Terra", 1.0, "earth.jpg", new THREE.Color(0x0081C6), 0.001, 5.0, 0.4, 1.4, earthAnimator, this.camera);
         this.solarSystem.add(earth);
 
         // Moon
-        let moonAnimator = new PlanetAnimator(3, 0.001, 1, 0.0);
+        let moonAnimator = new PlanetAnimator(3, 0.0, 0.0, 0.0);
         let moon = new Planet("Luna", 1.0/2.0, "moon.jpg", moonAnimator);
         earth.add(moon);
 
         // Mars
-        let marsAnimator = new PlanetAnimator(20, 0.0003, 1, 0.5);
+        let marsAnimator = new PlanetAnimator(35, 0.0003, 0.001, 0.5);
         let mars = new GlowingPlanet("Marte", 0.9, "mars.jpg", new THREE.Color(0xFE8201), 0.001, 10.0, 0.4, 1.4, marsAnimator, this.camera);
         this.solarSystem.add(mars);
 
         // Jupiter
-        let jupiterAnimator = new PlanetAnimator(35, 0.0001, 1, 1.0);
+        let jupiterAnimator = new PlanetAnimator(50, 0.0001, 0.0005, 1.0);
         let jupiter = new GlowingPlanet("Giove", 1.5, "jupiter.jpg", new THREE.Color(0xFE8233), 0.001, 10.0, 0.4, 1.4, jupiterAnimator, this.camera);
         this.solarSystem.add(jupiter);
 
         // Ganymede
-        let ganymedeAnimator = new PlanetAnimator(5, 0.0005, 1, 0.0);
+        let ganymedeAnimator = new PlanetAnimator(5, 0.0, 0.0, 0.0);
         let ganymede = new Planet("Ganimede", 0.7, "ganymede.jpg", ganymedeAnimator);
         jupiter.add(ganymede);
 
@@ -108,7 +107,7 @@ class SolarSystemApplication extends Application {
 			density: 0.96,
 			decay: 0.93,
 			weight: 0.4,
-			exposure: 0.6,
+			exposure: 0.4,
 			samples: 60,
 			clampMax: 1.0
         });
@@ -118,15 +117,6 @@ class SolarSystemApplication extends Application {
 
     update(dt: number) {
         this.t += dt;
-
-        // Find planet-mouse intersection
-        this.raycaster.setFromCamera(this.mousePos, this.camera);
-        let intersects = this.raycaster.intersectObjects(this.scene.children, true);
-        for (var i = 0; i < intersects.length; i++) {
-            if (intersects[i].object instanceof Planet) {
-                this.overPlanet = intersects[i].object as Planet;
-            }
-        }
 
         this.orbitControl.update();
         this.solarSystem.update(this.t);

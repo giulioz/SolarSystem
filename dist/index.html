@@ -36,6 +36,7 @@ void main() {
 uniform vec3 glowColor;
 varying float intensity;
 void main() {
+    vec3 sunPo = vec3(0.0, 0.0, 0.0);
     gl_FragColor = vec4(glowColor * intensity, 1.0);
 }
 </script>
