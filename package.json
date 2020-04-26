@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.1",
-    "express": "^4.16.3",
+    "express": "^4.17.1",
     "postprocessing": "^4.3.3",
     "three": "^0.91.0",
     "zingtouch": "^1.0.5"
