@@ -7,7 +7,7 @@
     "build-prod": "webpack -p --progress"
   },
   "devDependencies": {
-    "@types/three": "^0.91.0",
+    "@types/three": "^0.103.2",
     "ts-loader": "^4.1.0",
     "typescript": "^2.7.2",
     "webpack": "^4.2.0",
